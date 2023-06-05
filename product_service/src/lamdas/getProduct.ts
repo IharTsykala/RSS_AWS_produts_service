@@ -3,7 +3,7 @@ import { products } from "../mocks/products";
 
 export const handler = async (event) => {
   try {
-    const productId = event.pathParameters?.id;
+    const productId = event.pathParameters?.idProduct;
     if (!productId) {
       return response(500, {
         message: "Error Id",
