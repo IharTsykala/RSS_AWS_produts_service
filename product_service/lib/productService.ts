@@ -5,6 +5,19 @@ import { HttpLambdaIntegration } from "@aws-cdk/aws-apigatewayv2-integrations-al
 import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 
+const routes = [
+  {
+    functionName: "getProducts",
+    entry: "src/lamdas/getProducts.ts",
+    path: "/products",
+  },
+  {
+    functionName: "getProduct",
+    entry: "src/lamdas/getProduct.ts",
+    path: "/products/{idProduct}",
+  },
+]
+
 export class ProductService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -16,18 +29,6 @@ export class ProductService extends cdk.Stack {
       },
     };
 
-    const getProducts = new NodejsFunction(this, "GetProducts", {
-      ...sharedLambdaProps,
-      functionName: "getProducts",
-      entry: "src/lamdas/getProducts.ts",
-    });
-
-    const getProduct = new NodejsFunction(this, "GetProduct", {
-      ...sharedLambdaProps,
-      functionName: "getProduct",
-      entry: "src/lamdas/getProduct.ts",
-    });
-
     const api = new apiGateway.HttpApi(this, "ProductApi", {
       corsPreflight: {
         allowHeaders: ["*"],
@@ -36,22 +37,23 @@ export class ProductService extends cdk.Stack {
       },
     });
 
-    api.addRoutes({
-      integration: new HttpLambdaIntegration(
-        "GetProductsListIntegration",
-        getProducts
-      ),
-      path: "/products",
-      methods: [apiGateway.HttpMethod.GET],
-    });
+    for (const route of routes) {
+      const {functionName, entry, path} = route
 
-    api.addRoutes({
-      integration: new HttpLambdaIntegration(
-        "GetProductsListIntegration",
-        getProduct
-      ),
-      path: "/products/{idProduct}",
-      methods: [apiGateway.HttpMethod.GET],
-    });
+      const getRoute = new NodejsFunction(this, "GetProducts", {
+        ...sharedLambdaProps,
+        functionName,
+        entry,
+      });
+
+      api.addRoutes({
+        integration: new HttpLambdaIntegration(
+          "GetProductsListIntegration",
+          getRoute
+        ),
+        path,
+        methods: [apiGateway.HttpMethod.GET],
+      });
+    }
   }
 }
