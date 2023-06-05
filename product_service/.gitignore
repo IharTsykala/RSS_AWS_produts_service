@@ -1,6 +1,12 @@
+*.js
+*.d.ts
+
 .idea
 .vscode
 .env
 
 /dist
 /node_modules
+
+.cdk.staging
+cdk.out
