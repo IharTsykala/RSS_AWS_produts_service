@@ -1,8 +1,9 @@
+import { APIGatewayEvent } from 'aws-lambda'
 import { response } from '../utils/response'
 
 import { getProductDB } from '../services'
 
-export const handler = async (event: any) => {
+export const handler = async (event: APIGatewayEvent): Promise<any> => {
   try {
     const { productId } = event.pathParameters ?? {}
 

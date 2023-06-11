@@ -11,13 +11,15 @@ const Stocks = [
   },
 ]
 
-const fillStocksTable = async () => {
+export const fillStocksTable = async () => {
   for (const item of Stocks) {
     try {
       await putStockDB(item)
       console.log(`Filled ${item.product_id}`)
     } catch (error) {
-      console.log(`Error ${item.product_id}`, error.message)
+      if (error instanceof Error) {
+        console.log(`Error ${item.product_id}`, error.message)
+      }
     }
   }
 }

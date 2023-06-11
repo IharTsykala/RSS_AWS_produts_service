@@ -21,7 +21,9 @@ const fillTableProducts = async () => {
       await putProductsDB(item)
       console.log(`Filled ${item.id}`)
     } catch (error) {
-      console.error(`Error ${item.id}:`, error.message)
+      if (error instanceof Error) {
+        console.error(`Error ${item.id}:`, error.message)
+      }
     }
   }
 }

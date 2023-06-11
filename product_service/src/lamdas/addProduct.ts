@@ -1,10 +1,12 @@
+import { APIGatewayEvent } from 'aws-lambda'
 import { v4 as uuid } from 'uuid'
 
 import { response } from '../utils/response'
 import { putProductsDB } from '../services'
 
-export const handler = async (event) => {
+export const handler = async (event: APIGatewayEvent): Promise<any> => {
   try {
+    //@ts-ignore
     const { title, description, price } = JSON.parse(event.body)
 
     if (!title) {

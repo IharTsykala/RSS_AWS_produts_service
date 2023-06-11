@@ -12,18 +12,21 @@ const routes = [
     functionName: 'getProducts',
     entry: 'src/lamdas/getProducts.ts',
     path: '/products',
+    methods: 'GET',
   },
   {
     id: 'GetProduct',
     functionName: 'getProduct',
     entry: 'src/lamdas/getProduct.ts',
     path: '/products/{idProduct}',
+    methods: 'GET',
   },
   {
     id: 'AddProduct',
     functionName: 'addProduct',
     entry: 'src/lamdas/addProduct.ts',
     path: '/products',
+    methods: 'POST',
   },
 ]
 
@@ -49,7 +52,7 @@ export class ProductService extends cdk.Stack {
     })
 
     for (const route of routes) {
-      const { id, functionName, entry, path } = route
+      const { id, functionName, entry, path, methods } = route
 
       const getRoutes = new NodejsFunction(this, id, {
         ...sharedLambdaProps,
@@ -63,7 +66,8 @@ export class ProductService extends cdk.Stack {
       api.addRoutes({
         integration: new HttpLambdaIntegration('GetProducts', getRoutes),
         path,
-        methods: [apiGateway.HttpMethod.GET],
+        // eslint-disable-next-line prettier/prettier
+        methods: [apiGateway.HttpMethod[methods as keyof typeof apiGateway.HttpMethod]],
       })
     }
   }

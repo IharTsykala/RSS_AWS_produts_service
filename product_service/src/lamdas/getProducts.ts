@@ -1,7 +1,7 @@
 import { response } from '../utils/response'
 import { getProductsDB, getStocksDB } from '../services'
 
-export const handler = async () => {
+export const handler = async (): Promise<any> => {
   try {
     const products = (await getProductsDB()) ?? []
 
@@ -24,8 +24,10 @@ export const handler = async () => {
 
     return response(200, productWithStock)
   } catch (error) {
-    return response(500, {
-      message: error.message,
-    })
+    if (error instanceof Error) {
+      return response(500, {
+        message: error.message,
+      })
+    }
   }
 }
