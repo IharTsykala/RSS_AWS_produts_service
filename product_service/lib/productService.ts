@@ -4,6 +4,7 @@ import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha'
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha'
 import { Construct } from 'constructs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 
 const routes = [
   {
@@ -18,11 +19,19 @@ const routes = [
     entry: 'src/lamdas/getProduct.ts',
     path: '/products/{idProduct}',
   },
+  {
+    id: 'AddProduct',
+    functionName: 'addProduct',
+    entry: 'src/lamdas/addProduct.ts',
+    path: '/products',
+  },
 ]
 
 export class ProductService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
+
+    const productsTable = dynamodb.Table.fromTableName(this, 'Products', `Products`)
 
     const sharedLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -42,14 +51,17 @@ export class ProductService extends cdk.Stack {
     for (const route of routes) {
       const { id, functionName, entry, path } = route
 
-      const getRoute = new NodejsFunction(this, id, {
+      const getRoutes = new NodejsFunction(this, id, {
         ...sharedLambdaProps,
         functionName,
         entry,
+        environment: {
+          TABLE_NAME: productsTable.tableName,
+        },
       })
 
       api.addRoutes({
-        integration: new HttpLambdaIntegration('GetProductsListIntegration', getRoute),
+        integration: new HttpLambdaIntegration('GetProducts', getRoutes),
         path,
         methods: [apiGateway.HttpMethod.GET],
       })
