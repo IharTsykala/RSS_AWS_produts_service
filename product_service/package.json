@@ -7,9 +7,8 @@
   "scripts": {
     "build": "tsc",
     "cdk": "cdk",
-    "cdk:deploy": "cdk deploy --require-approval never",
-    "cdk:bootstrap": "cdk bootstrap",
-
+    "cdk:deploy": "cdk deploy --profile=IharTsykala23 --require-approval never",
+    "cdk:bootstrap": "cdk bootstrap"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.115",
