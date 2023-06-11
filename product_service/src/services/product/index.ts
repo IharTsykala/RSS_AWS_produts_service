@@ -7,10 +7,6 @@ interface IProduct {
   price: number | undefined;
 }
 
-interface ProductWithCount extends IProduct {
-  count: number;
-}
-
 interface IStock {
   product_id: string;
   count: number;
@@ -69,54 +65,3 @@ export const putStockDB = async (newStockItem: IStock) => {
   //@ts-ignore
   return await dynamoDB.put(body).promise()
 }
-
-const Products = [
-  {
-    id: 'e5fgh9d2-e552-4fgh-afg9-d401a1e7jrf5',
-    title: 'Product',
-    description: 'Description',
-    price: 4,
-  },
-  {
-    id: 'ee4gh9d2-eg52-4fgh-a6g9-d401a1e6fd56',
-    title: 'Product 2',
-    description: 'Description 2',
-    price: 5,
-  },
-]
-
-const fillTableWithTestProducts = async () => {
-  for (const item of Products) {
-    try {
-      await putProductsDB(item)
-      console.log(`Filled ${item.id}`)
-    } catch (error) {
-      console.error(`Error ${item.id}:`, error.message)
-    }
-  }
-}
-
-const Stocks = [
-  {
-    product_id: 'e5fgh9d2-e5g2-4fgh-afy9-d401a1e7jrf5',
-    count: 10,
-  },
-  {
-    product_id: 'ee4gh9d2-eg52-4fgh-a6g9-d401a166fd59',
-    count: 11,
-  },
-]
-
-const fillTableWithTestStockItems = async () => {
-  for (const item of Stocks) {
-    try {
-      await putStockDB(item)
-      console.log(`Filled ${item.product_id}`)
-    } catch (error) {
-      console.log(`Error ${item.product_id}`, error.message)
-    }
-  }
-}
-
-fillTableWithTestProducts().then()
-fillTableWithTestStockItems().then()
