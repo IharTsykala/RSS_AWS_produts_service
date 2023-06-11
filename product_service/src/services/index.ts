@@ -1,1 +1,1 @@
-export { getProductDB, getProductsDB, getStockDB, putProductsDB, putStockDB } from './product'
+export { getProductDB, getProductsDB, getStocksDB, putProductsDB, putStockDB } from './product'

@@ -1,10 +1,29 @@
 import { response } from '../utils/response'
-import { products } from '../mocks/products'
+import { getProductsDB, getStocksDB } from '../services'
 
 export const handler = async () => {
   try {
-    return response(200, products)
-  } catch (error: any) {
+    const products = (await getProductsDB()) ?? []
+
+    if (!products.length) {
+      return []
+    }
+
+    const stocks = (await getStocksDB()) ?? []
+
+    if (!stocks.length) {
+      return products
+    }
+
+    const productWithStock = products.map((product) => {
+      return {
+        ...product,
+        count: stocks.find((stock) => stock.product_id === product.id)?.count ?? 0,
+      }
+    })
+
+    return response(200, productWithStock)
+  } catch (error) {
     return response(500, {
       message: error.message,
     })

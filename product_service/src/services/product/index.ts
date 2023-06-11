@@ -51,7 +51,7 @@ export const putProductsDB = async (newProduct: IProduct) => {
   return await dynamoDB.put(body).promise()
 }
 
-export const getStockDB = async () => {
+export const getStocksDB = async () => {
   const result = await dynamoDB
     .scan({
       TableName: 'Stocks',
@@ -91,7 +91,7 @@ const fillTableWithTestProducts = async () => {
       await putProductsDB(item)
       console.log(`Filled ${item.id}`)
     } catch (error) {
-      console.error(`Error ${item.id}:`, error)
+      console.error(`Error ${item.id}:`, error.message)
     }
   }
 }
@@ -113,7 +113,7 @@ const fillTableWithTestStockItems = async () => {
       await putStockDB(item)
       console.log(`Filled ${item.product_id}`)
     } catch (error) {
-      console.log(`Error ${item.product_id}`)
+      console.log(`Error ${item.product_id}`, error.message)
     }
   }
 }

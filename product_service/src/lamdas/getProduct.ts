@@ -1,24 +1,30 @@
 import { response } from '../utils/response'
-import { products } from '../mocks/products'
+
+import { getProductDB } from '../services'
 
 export const handler = async (event: any) => {
   try {
-    const productId = event.pathParameters?.idProduct
+    const { productId } = event.pathParameters ?? {}
+
     if (!productId) {
       return response(500, {
         message: 'Error Id',
       })
     }
-    const product = products.find((prod) => prod.id === productId)
+
+    const product = await getProductDB(productId)
     if (!product) {
       return response(500, {
         message: 'Error Id',
       })
     }
+
     return response(200, product)
-  } catch (error: any) {
-    return response(500, {
-      message: error.message,
-    })
+  } catch (error) {
+    if (error instanceof Error) {
+      return response(500, {
+        message: error.message,
+      })
+    }
   }
 }
