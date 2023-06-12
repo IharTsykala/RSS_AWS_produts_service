@@ -15,7 +15,7 @@ const Products = [
   },
 ]
 
-export const fillTableProducts = async () => {
+const fillTableProducts = async () => {
   for (const item of Products) {
     try {
       await putProductsDB(item)

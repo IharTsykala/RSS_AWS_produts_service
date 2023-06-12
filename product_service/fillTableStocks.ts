@@ -1,4 +1,4 @@
-import { putStockDB } from './src/services'
+const { putStockDB } = require('./src/services')
 
 const Stocks = [
   {
@@ -11,7 +11,7 @@ const Stocks = [
   },
 ]
 
-export const fillStocksTable = async () => {
+const fillStocksTable = async () => {
   for (const item of Stocks) {
     try {
       await putStockDB(item)
