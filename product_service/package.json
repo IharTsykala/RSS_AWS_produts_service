@@ -9,8 +9,8 @@
     "cdk": "cdk",
     "cdk:deploy": "cdk deploy --profile=IharTsykala23 --require-approval never",
     "cdk:bootstrap": "cdk bootstrap",
-    "table:products": "ts-node ./src/services/fillProductsTable",
-    "table:stocks": "ts-node ./src/services/fillStocksTable"
+    "table:products": "ts-node fillProductsTable.ts",
+    "table:stocks": "node fillStocksTable.ts"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.115",
@@ -26,6 +26,8 @@
   "dependencies": {
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.81.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.81.0-alpha.0",
+    "@aws-sdk/client-dynamodb": "^3.350.0",
+    "@aws-sdk/lib-dynamodb": "^3.350.0",
     "@typescript-eslint/eslint-plugin": "^5.47.0",
     "@typescript-eslint/parser": "^5.47.0",
     "aws-cdk-lib": "^2.78.0",

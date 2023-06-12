@@ -1,4 +1,12 @@
 import * as AWS from 'aws-sdk'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  GetCommand,
+  PutCommand,
+  TransactWriteCommand,
+} from '@aws-sdk/lib-dynamodb'
 
 interface IProduct {
   id: string;
@@ -15,22 +23,35 @@ interface IStock {
 AWS.config.update({ region: 'us-east-1' })
 const dynamoDB = new AWS.DynamoDB.DocumentClient()
 
+// const client = new DynamoDBClient({})
+// const ddbDocClient = DynamoDBDocumentClient.from(client)
+//
+// const scanTable = async (tableName: string): Promise<any[]> => {
+//   try {
+//     const data = await ddbDocClient.send(new ScanCommand({ TableName: tableName }))
+//     return data.Items || []
+//   } catch (err) {
+//     console.error(`Error scanning table ${tableName}:`, err)
+//     return []
+//   }
+// }
+
 export const getProductsDB = async () => {
   const result = await dynamoDB
     .scan({
-      TableName: 'Products',
+      TableName: 'products',
     })
     .promise()
 
   return result.Items
 }
 
-export const getProductDB = async (id: string) => {
+export const getProductDB = async (keyID: string, id: string) => {
   const result = await dynamoDB
     .get({
-      TableName: 'Products',
+      TableName: 'products',
       Key: {
-        id: id,
+        [keyID]: id,
       },
     })
     .promise()
@@ -40,7 +61,7 @@ export const getProductDB = async (id: string) => {
 
 export const putProductsDB = async (newProduct: IProduct) => {
   const body = {
-    TableName: 'Products',
+    TableName: 'products',
     Item: newProduct,
   }
   //@ts-ignore
@@ -50,7 +71,7 @@ export const putProductsDB = async (newProduct: IProduct) => {
 export const getStocksDB = async () => {
   const result = await dynamoDB
     .scan({
-      TableName: 'Stocks',
+      TableName: 'stocks',
     })
     .promise()
 
@@ -59,7 +80,7 @@ export const getStocksDB = async () => {
 
 export const putStockDB = async (newStockItem: IStock) => {
   const body = {
-    TableName: 'Stocks',
+    TableName: 'stocks',
     Item: newStockItem,
   }
   //@ts-ignore

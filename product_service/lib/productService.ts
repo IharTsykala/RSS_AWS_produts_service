@@ -34,12 +34,15 @@ export class ProductService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const productsTable = dynamodb.Table.fromTableName(this, 'Products', `Products`)
+    const productsTable = dynamodb.Table.fromTableName(this, 'Products', `products`)
+    const stocksTable = dynamodb.Table.fromTableName(this, 'Stocks', 'stocks');
 
     const sharedLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
       environment: {
         PRODUCT_AWS_REGION: 'us-east-1',
+        TABLE_NAME_PRODUCT: "products",
+        TABLE_NAME_STOCK: "stocks"
       },
     }
 
@@ -58,10 +61,21 @@ export class ProductService extends cdk.Stack {
         ...sharedLambdaProps,
         functionName,
         entry,
-        environment: {
-          TABLE_NAME: productsTable.tableName,
-        },
+        // environment: {
+        //   TABLE_NAME: productsTable.tableName,
+        // },
       })
+
+      // if(id === "GetProducts") {
+        productsTable.grantReadWriteData(getRoutes);
+        stocksTable.grantReadWriteData(getRoutes);
+      // }
+      // table.grantReadWriteData(getProductsList);
+      // table.grantReadWriteData(getProductsById);
+      // tableStock.grantReadWriteData(getProductsList);
+      // tableStock.grantReadWriteData(getProductsById);
+      // table.grantReadWriteData(createProduct);
+      // tableStock.grantReadWriteData(createProduct);
 
       api.addRoutes({
         integration: new HttpLambdaIntegration('GetProducts', getRoutes),

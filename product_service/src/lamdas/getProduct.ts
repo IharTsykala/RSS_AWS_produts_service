@@ -5,15 +5,15 @@ import { getProductDB } from '../services'
 
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
   try {
-    const { productId } = event.pathParameters ?? {}
+    const idProduct = event.pathParameters?.idProduct
 
-    if (!productId) {
+    if (!idProduct) {
       return response(500, {
         message: 'Error Id',
       })
     }
 
-    const product = await getProductDB(productId)
+    const product = await getProductDB('id', idProduct)
     if (!product) {
       return response(500, {
         message: 'Error Id',
@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   } catch (error) {
     if (error instanceof Error) {
       return response(500, {
-        message: error.message,
+        message: error,
       })
     }
   }
