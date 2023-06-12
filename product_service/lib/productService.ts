@@ -61,21 +61,10 @@ export class ProductService extends cdk.Stack {
         ...sharedLambdaProps,
         functionName,
         entry,
-        // environment: {
-        //   TABLE_NAME: productsTable.tableName,
-        // },
       })
 
-      // if(id === "GetProducts") {
         productsTable.grantReadWriteData(getRoutes);
         stocksTable.grantReadWriteData(getRoutes);
-      // }
-      // table.grantReadWriteData(getProductsList);
-      // table.grantReadWriteData(getProductsById);
-      // tableStock.grantReadWriteData(getProductsList);
-      // tableStock.grantReadWriteData(getProductsById);
-      // table.grantReadWriteData(createProduct);
-      // tableStock.grantReadWriteData(createProduct);
 
       api.addRoutes({
         integration: new HttpLambdaIntegration('GetProducts', getRoutes),

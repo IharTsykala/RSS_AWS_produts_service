@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
   } catch (error) {
     if (error instanceof Error) {
       return response(500, {
-        message: error,
+        message: error.message,
       })
     }
   }
