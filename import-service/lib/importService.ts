@@ -9,6 +9,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as s3 from 'aws-cdk-lib/aws-s3';
 
+import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
+
 const routes = [
   {
     id: 'PutProduct',
@@ -38,14 +40,29 @@ export class ImportService extends cdk.Stack {
       },
     }
 
-    const bucket = s3.Bucket.fromBucketName(this, 'ImportBucket', "import-service");
+    // const bucket = s3.Bucket(this, 'ImportBucket', {
+    //   bucketName: "import-service",
+    //   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    //   removalPolicy: RemovalPolicy.DESTROY,
+    //   autoDeleteObjects: true,
+    // });
+
+    const bucket = new s3.Bucket(this, 'ImportBucket', {
+        bucketName: "import-service",
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        enforceSSL: true,
+        versioned: true,
+        removalPolicy: cdk.RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      })
 
     const api = new apiGateway.HttpApi(this, 'ImportServiceApi', {
       corsPreflight: {
         allowHeaders: ['*'],
         allowOrigins: ['*'],
         allowMethods: [apiGateway.CorsHttpMethod.ANY],
-      },
+      }
     })
 
     for (const route: any of routes) {
@@ -58,14 +75,20 @@ export class ImportService extends cdk.Stack {
       })
 
       bucket.grantReadWrite(getRoutes);
+      bucket.grantDelete(getRoutes);
 
-      if(!route.methods) {
-        bucket.addEventNotification(
-          s3.EventType.OBJECT_CREATED,
-          new s3n.LambdaDestination(route),
-          { prefix: 'upload/' }
-        );
-      }
+      // if(!route.methods) {
+      //   bucket.addEventNotification(
+      //     s3.EventType.OBJECT_CREATED,
+      //     new s3n.LambdaDestination(route),
+      //     { prefix: 'upload/' }
+      //   );
+      // }
+      bucket.addEventNotification(
+        s3.EventType.OBJECT_CREATED,
+        new s3notificaitions.LambdaDestination(getRoutes),
+        { prefix: 'upload/' }
+      );
 
       if(route.methods) {
         api.addRoutes({
