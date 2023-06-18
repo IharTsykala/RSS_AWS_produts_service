@@ -23,11 +23,11 @@ export const handler = async (event: any) => {
   for (const record of event.Records) {
     const { key } = record.s3.object
 
-    if (!key.startsWith('upload/')) {
+    if (!key.startsWith('uploaded/')) {
       continue
     }
 
-    const readStream = await getObjectReadStream('import-service', key)
+    const readStream = await getObjectReadStream('import-service3', key)
 
     readStream
       .pipe(csvParser())

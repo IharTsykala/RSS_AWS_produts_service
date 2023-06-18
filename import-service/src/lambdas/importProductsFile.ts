@@ -7,7 +7,8 @@ import { response } from '../utils/response'
 
 const s3Client = new S3Client({ region: 'us-east-1' })
 
-const isFileExist = async (s3Client: { send: any }, bucket: any, key: any) => {
+//@ts-ignore
+const isFileExist = async (s3Client: any, bucket: any, key: any) => {
   try {
     await s3Client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
     return true
@@ -32,7 +33,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     }
 
     const putObjectParams = {
-      Bucket: 'import-service',
+      Bucket: 'import-service3',
       Key: `uploaded/${fileName}`,
       ContentType: 'text/csv',
     }
@@ -48,7 +49,7 @@ export const handler = async (event: APIGatewayEvent): Promise<any> => {
     }
 
     const signedUrl = await getSignedUrl(s3Client, putObjectCommandInstance, {
-      expiresIn: 30,
+      expiresIn: 120,
     })
 
     console.log('signedUrl', signedUrl)

@@ -2,7 +2,7 @@
   "name": "import_service",
   "version": "1.0.0",
   "bin": {
-    "products-service": "bin/importService.js"
+    "import-service": "bin/importService.js"
   },
   "scripts": {
     "build": "tsc",

@@ -4,5 +4,5 @@ import * as cdk from 'aws-cdk-lib'
 import { ImportService } from '../lib/importService'
 
 const app = new cdk.App()
-new ImportService(app, 'ProductServiceStack')
+new ImportService(app, 'ImportServiceStack')
 app.synth()

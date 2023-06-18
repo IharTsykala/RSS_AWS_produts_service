@@ -13,17 +13,17 @@ import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
 
 const routes = [
   {
-    id: 'PutProduct',
-    functionName: 'putProduct',
-    entry: 'src/lambdas/putProduct.ts',
+    id: 'ImportProductsFile',
+    functionName: 'importProductsFile',
+    entry: 'src/lambdas/importProductsFile.ts',
     path: '/import',
-    methods: 'PUT',
+    methods: 'GET',
   },
   {
     id: 'GetParser',
     functionName: 'getParser',
     entry: 'src/lambdas/getParser.ts',
-    path: '/import',
+    path: '',
     methods: '',
   },
 ]
@@ -36,7 +36,7 @@ export class ImportService extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_18_X,
       environment: {
         PRODUCT_AWS_REGION: 'us-east-1',
-        S3_BUCKET_NAME: 'import-service',
+        S3_BUCKET_NAME: 'import-service3',
       },
     }
 
@@ -48,7 +48,7 @@ export class ImportService extends cdk.Stack {
     // });
 
     const bucket = new s3.Bucket(this, 'ImportBucket', {
-        bucketName: "import-service",
+        bucketName: "import-service3",
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
         encryption: s3.BucketEncryption.S3_MANAGED,
         enforceSSL: true,
@@ -65,7 +65,7 @@ export class ImportService extends cdk.Stack {
       }
     })
 
-    for (const route: any of routes) {
+    for (const route of routes) {
       const { id, functionName, entry, path, methods } = route
 
       const getRoutes = new NodejsFunction(this, id, {
@@ -84,15 +84,16 @@ export class ImportService extends cdk.Stack {
       //     { prefix: 'upload/' }
       //   );
       // }
+      if(!route.methods) {
       bucket.addEventNotification(
         s3.EventType.OBJECT_CREATED,
         new s3notificaitions.LambdaDestination(getRoutes),
-        { prefix: 'upload/' }
-      );
+        { prefix: 'uploaded/' }
+      )}
 
       if(route.methods) {
         api.addRoutes({
-          integration: new HttpLambdaIntegration('PutProduct', getRoutes),
+          integration: new HttpLambdaIntegration('ImportProductsFile', getRoutes),
           path,
           // eslint-disable-next-line prettier/prettier
           methods: [apiGateway.HttpMethod[methods as keyof typeof apiGateway.HttpMethod]],
