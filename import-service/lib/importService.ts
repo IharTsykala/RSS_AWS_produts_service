@@ -6,7 +6,6 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import * as cdk from 'aws-cdk-lib'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
-import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as s3 from 'aws-cdk-lib/aws-s3';
 
 import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
@@ -43,9 +42,6 @@ export class ImportService extends cdk.Stack {
     const bucket = new s3.Bucket(this, 'ImportBucket', {
         bucketName: "import-service3",
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        // encryption: s3.BucketEncryption.S3_MANAGED,
-        // enforceSSL: true,
-        // versioned: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
         cors: [
