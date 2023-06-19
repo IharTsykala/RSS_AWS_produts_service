@@ -26,7 +26,7 @@ const isFileExist = async (s3Client: any, bucket: any, key: any) => {
 export const handler = async (event: APIGatewayEvent): Promise<any> => {
   try {
     const fileName = event.queryStringParameters?.name
-    console.log('filename: ', event)
+    console.log('filename', fileName)
 
     if (!fileName) {
       return response(400, 'Query parameter is required.')

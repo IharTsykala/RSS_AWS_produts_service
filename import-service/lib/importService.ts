@@ -40,21 +40,22 @@ export class ImportService extends cdk.Stack {
       },
     }
 
-    // const bucket = s3.Bucket(this, 'ImportBucket', {
-    //   bucketName: "import-service",
-    //   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-    //   removalPolicy: RemovalPolicy.DESTROY,
-    //   autoDeleteObjects: true,
-    // });
-
     const bucket = new s3.Bucket(this, 'ImportBucket', {
         bucketName: "import-service3",
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        encryption: s3.BucketEncryption.S3_MANAGED,
-        enforceSSL: true,
-        versioned: true,
+        // encryption: s3.BucketEncryption.S3_MANAGED,
+        // enforceSSL: true,
+        // versioned: true,
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         autoDeleteObjects: true,
+        cors: [
+          {
+            allowedOrigins: ["*"],
+            allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT],
+            allowedHeaders: ["*"],
+            exposedHeaders: [],
+          },
+      ],
       })
 
     const api = new apiGateway.HttpApi(this, 'ImportServiceApi', {
@@ -77,13 +78,7 @@ export class ImportService extends cdk.Stack {
       bucket.grantReadWrite(getRoutes);
       bucket.grantDelete(getRoutes);
 
-      // if(!route.methods) {
-      //   bucket.addEventNotification(
-      //     s3.EventType.OBJECT_CREATED,
-      //     new s3n.LambdaDestination(route),
-      //     { prefix: 'upload/' }
-      //   );
-      // }
+
       if(!route.methods) {
       bucket.addEventNotification(
         s3.EventType.OBJECT_CREATED,
