@@ -5,6 +5,8 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import { Construct } from 'constructs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
+import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as sns from 'aws-cdk-lib/aws-sns';
 
 const routes = [
   {
@@ -36,6 +38,13 @@ export class ProductService extends cdk.Stack {
 
     const productsTable = dynamodb.Table.fromTableName(this, 'Products', `products`)
     const stocksTable = dynamodb.Table.fromTableName(this, 'Stocks', 'stocks');
+
+    const catalogItemsQueue = new sqs.Queue(this, 'CatalogItemsQueue', {
+      queueName: 'catalog-items-queue',
+    });
+    const createProductTopic = new sns.Topic(this, 'CreateProductTopic', {
+      topicName: 'create-product-topic',
+    });
 
     const sharedLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
