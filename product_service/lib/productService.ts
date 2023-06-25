@@ -5,9 +5,9 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import { Construct } from 'constructs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
-import * as lambdaEventSources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 import * as sns from 'aws-cdk-lib/aws-sns';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 
 const routes = [
@@ -71,34 +71,56 @@ export class ProductService extends cdk.Stack {
       },
     })
 
+    const createProductTopic = new sns.Topic(this, 'CreateProductTopic', {
+      topicName: 'createProductTopic',
+    });
+
+    const firstFilterPolicy = {
+      count: sns.SubscriptionFilter.numericFilter({
+        lessThanOrEqualTo: 12,
+      }),
+    };
+
+    createProductTopic.addSubscription(new subscriptions.EmailSubscription(process.env.EMAIL, {
+      filterPolicy: firstFilterPolicy
+    }));
+
+    const secondFilterPolicy = {
+      count: sns.SubscriptionFilter.numericFilter({
+        greaterThan: 12,
+      }),
+    };
+
+    createProductTopic.addSubscription(
+      new subscriptions.EmailSubscription(process.env.ADDITIONAL_EMAIL, {
+        filterPolicy: secondFilterPolicy
+      })
+    );
+
     for (const route of routes) {
       const { id, functionName, entry, path, methods, handler, timeout } = route
 
       const getRoutes = new NodejsFunction(this, id, {
-        ...sharedLambdaProps,
+        ...{...sharedLambdaProps,
+        environment: {...sharedLambdaProps.environment,
+        CREATE_PRODUCT_TOPIC_ARN: createProductTopic.topicArn}},
         functionName,
         entry,
         handler,
-        timeout
+        timeout,
       })
 
       if(handler) {
-        const createProductTopic = new sns.Topic(this, 'CreateProductTopic', {
-          topicName: 'createProductTopic',
+        createProductTopic.grantPublish(getRoutes);
+
+        const catalogItemsQueue = new sqs.Queue(this, 'catalogQueue', {
+          queueName: 'catalogQueue',
+          visibilityTimeout: timeout
         });
 
-        createProductTopic.addSubscription(new subscriptions.EmailSubscription(process.env.EMAIL));
-
-        const catalogItemsQueue = new sqs.Queue(this, "catalogItemsQueue");
-
-        catalogItemsQueue.grantConsumeMessages(getRoutes);
-
-        const catalogItemsQueueEvent = new lambdaEventSources.SqsEventSource(
-          catalogItemsQueue,
-          { batchSize: 5 }
-        );
-
-        getRoutes.addEventSource(catalogItemsQueueEvent);
+        getRoutes.addEventSource(new SqsEventSource(catalogItemsQueue, {
+          batchSize: 5,
+        }));
       }
 
       productsTable.grantReadWriteData(getRoutes);
