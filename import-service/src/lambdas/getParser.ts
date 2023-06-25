@@ -1,10 +1,12 @@
 import csvParser from 'csv-parser'
-
-import { S3, S3Client, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
-
 import { PassThrough, Readable } from 'stream'
 
+import { SQSClient } from '@aws-sdk/client-sqs'
+import { S3, S3Client, CopyObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { SendMessageCommand } from '@aws-sdk/client-sqs'
+
 const s3Client = new S3({})
+const sqsClient = new SQSClient({ region: 'us-east-1' })
 
 const getObjectReadStream = async (bucket: string, key: any) => {
   const passThroughStream = new PassThrough()
@@ -19,6 +21,22 @@ const getObjectReadStream = async (bucket: string, key: any) => {
   return passThroughStream
 }
 
+const csvRecords = (stream: Readable, onRecordHandler: any) => {
+  return new Promise((resolve, reject) => {
+    stream
+      .pipe(csvParser())
+      .on('data', async (data: any) => {
+        stream.pause()
+
+        await onRecordHandler(data)
+
+        stream.resume()
+      })
+      .on('end', resolve)
+      .on('error', reject)
+  })
+}
+
 const client = new S3Client({ region: 'us-east-1' })
 
 export const handler = async (event: any) => {
@@ -31,17 +49,40 @@ export const handler = async (event: any) => {
 
     const readStream = await getObjectReadStream('import-service3', key)
 
-    readStream
-      .pipe(csvParser())
-      .on('data', (data) => {
-        console.log('CSV file was recorded', data)
+    // readStream
+    //   .pipe(csvParser())
+    //   .on('data', (data) => {
+    //     console.log('CSV file was recorded', data)
+    //
+    //     // const sendMessageCommand = new SendMessageCommand({
+    //     //   QueueUrl: process.env.QUEUE_URL,
+    //     //   MessageBody: JSON.stringify(data),
+    //     //
+    //     //   await sqsClient.send(sendMessageCommand)
+    //     // })
+    //   })
+    //   .on('end', () => {
+    //     console.log('CSV parsing was completed', key)
+    //   })
+    //   .on('error', (error) => {
+    //     console.error('Error', error)
+    //   })
+
+    await csvRecords(readStream, async (data: any) => {
+      console.log('CSV record:', data)
+
+      const sendMessageCommand = new SendMessageCommand({
+        QueueUrl: process.env.QUEUE_URL,
+        MessageBody: JSON.stringify(data),
       })
-      .on('end', () => {
-        console.log('CSV parsing was completed', key)
-      })
-      .on('error', (error) => {
-        console.error('Error', error)
-      })
+
+      try {
+        await sqsClient.send(sendMessageCommand)
+        console.log('Message was sentSQS:', data)
+      } catch (error) {
+        console.error('Error sending message:', error)
+      }
+    })
 
     await client.send(
       new CopyObjectCommand({
