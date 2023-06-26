@@ -49,25 +49,6 @@ export const handler = async (event: any) => {
 
     const readStream = await getObjectReadStream('import-service3', key)
 
-    // readStream
-    //   .pipe(csvParser())
-    //   .on('data', (data) => {
-    //     console.log('CSV file was recorded', data)
-    //
-    //     // const sendMessageCommand = new SendMessageCommand({
-    //     //   QueueUrl: process.env.QUEUE_URL,
-    //     //   MessageBody: JSON.stringify(data),
-    //     //
-    //     //   await sqsClient.send(sendMessageCommand)
-    //     // })
-    //   })
-    //   .on('end', () => {
-    //     console.log('CSV parsing was completed', key)
-    //   })
-    //   .on('error', (error) => {
-    //     console.error('Error', error)
-    //   })
-
     await csvRecords(readStream, async (data: any) => {
       console.log('CSV record:', data)
 
@@ -88,7 +69,7 @@ export const handler = async (event: any) => {
       new CopyObjectCommand({
         Bucket: 'import-service3',
         CopySource: `import-service3/${key}`,
-        Key: key.replace('uploaded', 'parsed'),
+        Key: key?.replace('uploaded', 'parsed'),
       })
     )
 

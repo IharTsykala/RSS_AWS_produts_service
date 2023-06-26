@@ -35,12 +35,23 @@ const routes = [
   {
     id: 'CatalogBatchProcess',
     functionName: 'catalogBatchProcess',
-    entry: 'src/lambdas/catalogBatchProcess.ts',
+    entry: 'src/lamdas/catalogBatchProcess.ts',
     path: '',
     methods: '',
-    // handler: "catalogBatchProcessHandler",
+    handler: "catalogBatchProcess",
     timeout: cdk.Duration.seconds(20)
   },
+]
+
+const subscriptionsEmails = [
+  {
+    accessor: "firstFilterPolicy",
+    email: "tsykalaihar@gmail.com"
+  },
+  {
+    accessor: "secondFilterPolicy",
+    email: "tsykalaihar23@gmail.com"
+  }
 ]
 
 export class ProductService extends cdk.Stack {
@@ -49,10 +60,6 @@ export class ProductService extends cdk.Stack {
 
     const productsTable = dynamodb.Table.fromTableName(this, 'Products', `products`)
     const stocksTable = dynamodb.Table.fromTableName(this, 'Stocks', 'stocks');
-
-    // const createProductTopic = new sns.Topic(this, 'CreateProductTopic', {
-    //   topicName: 'create-product-topic',
-    // });
 
     const sharedLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,
@@ -75,42 +82,51 @@ export class ProductService extends cdk.Stack {
       topicName: 'createProductTopic',
     });
 
-    const firstFilterPolicy = {
-      count: sns.SubscriptionFilter.numericFilter({
-        lessThanOrEqualTo: 12,
-      }),
-    };
+    for (const subscription of subscriptionsEmails) {
 
-    createProductTopic.addSubscription(new subscriptions.EmailSubscription('tsykalaihar@gmail.com', {
-      filterPolicy: firstFilterPolicy
-    }));
+      const { email } = subscription
 
-    const secondFilterPolicy = {
-      count: sns.SubscriptionFilter.numericFilter({
-        greaterThan: 12,
-      }),
-    };
+      const filterPolicy = {
+        count: sns.SubscriptionFilter.numericFilter({
+          lessThanOrEqualTo: 12,
+        }),
+      };
 
-    createProductTopic.addSubscription(
-      new subscriptions.EmailSubscription('tsykalaihar23@gmail.com', {
-        filterPolicy: secondFilterPolicy
-      })
-    );
+      createProductTopic.addSubscription(new subscriptions.EmailSubscription(email, {
+        filterPolicy: filterPolicy
+      }));
+    }
 
     for (const route of routes) {
+      //@ts-ignore
       const { id, functionName, entry, path, methods, handler, timeout } = route
 
       const getRoutes = new NodejsFunction(this, id, {
-        ...{...sharedLambdaProps,
-        environment: {...sharedLambdaProps.environment,
-        CREATE_PRODUCT_TOPIC_ARN: createProductTopic.topicArn}},
+        ...sharedLambdaProps,
         functionName,
         entry,
-        handler,
         timeout,
+        handler,
+        environment: {
+          ...sharedLambdaProps.environment,
+          CREATE_PRODUCT_TOPIC_ARN: createProductTopic.topicArn
+        },
       })
 
-      if(timeout) {
+      if(path) {
+        productsTable.grantReadWriteData(getRoutes);
+        stocksTable.grantReadWriteData(getRoutes);
+
+
+        api.addRoutes({
+          integration: new HttpLambdaIntegration('GetProducts', getRoutes),
+          path,
+          // eslint-disable-next-line prettier/prettier
+          methods: [apiGateway.HttpMethod[methods as keyof typeof apiGateway.HttpMethod]],
+        })
+      }
+
+      if(!path) {
         createProductTopic.grantPublish(getRoutes);
 
         const catalogItemsQueue = new sqs.Queue(this, 'catalogQueue', {
@@ -122,16 +138,6 @@ export class ProductService extends cdk.Stack {
           batchSize: 5,
         }));
       }
-
-      productsTable.grantReadWriteData(getRoutes);
-      stocksTable.grantReadWriteData(getRoutes);
-
-      api.addRoutes({
-        integration: new HttpLambdaIntegration('GetProducts', getRoutes),
-        path,
-        // eslint-disable-next-line prettier/prettier
-        methods: [apiGateway.HttpMethod[methods as keyof typeof apiGateway.HttpMethod]],
-      })
     }
   }
 }

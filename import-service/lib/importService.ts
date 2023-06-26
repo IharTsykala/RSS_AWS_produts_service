@@ -1,4 +1,5 @@
 import { Construct } from 'constructs'
+import * as dotenv from 'dotenv'
 
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha'
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha'
@@ -10,6 +11,8 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
+
+dotenv.config()
 
 const routes = [
   {
@@ -32,7 +35,8 @@ export class ImportService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
 
-    const queue = sqs.Queue.fromQueueArn(this, 'catalogItemsQueue', `arn:aws:sqs:us-east-1:${process.env.AWS_ID}:catalogItemsQueue`);
+    // eslint-disable-next-line prettier/prettier
+    const queue = sqs.Queue.fromQueueArn(this, 'catalogItemsQueue', process.env.QUEUE_ARN!);
 
     const sharedLambdaProps = {
       runtime: lambda.Runtime.NODEJS_18_X,

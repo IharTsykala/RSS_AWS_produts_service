@@ -4,7 +4,7 @@ import { handler as addProduct } from './addProduct'
 
 const sns = new SNSClient({})
 
-export const catalogBatchProcess = async (event) => {
+export const catalogBatchProcess = async (event: any) => {
   console.log('batch', JSON.stringify(event, null, 2))
 
   try {
@@ -16,7 +16,7 @@ export const catalogBatchProcess = async (event) => {
 
       const snsParams = {
         Subject: 'Create product',
-        Message: `Product was created: ${JSON.stringify(message)}`,
+        Message: `Product was created ${JSON.stringify(message)}`,
         TopicArn: process.env.ARN_CREATE_PRODUCT_TOPIC,
         MessageAttributes: {
           count: {
