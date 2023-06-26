@@ -38,7 +38,7 @@ const routes = [
     entry: 'src/lambdas/catalogBatchProcess.ts',
     path: '',
     methods: '',
-    handler: "catalogBatchProcessHandler",
+    // handler: "catalogBatchProcessHandler",
     timeout: cdk.Duration.seconds(20)
   },
 ]
@@ -81,7 +81,7 @@ export class ProductService extends cdk.Stack {
       }),
     };
 
-    createProductTopic.addSubscription(new subscriptions.EmailSubscription(process.env.EMAIL, {
+    createProductTopic.addSubscription(new subscriptions.EmailSubscription('tsykalaihar@gmail.com', {
       filterPolicy: firstFilterPolicy
     }));
 
@@ -92,7 +92,7 @@ export class ProductService extends cdk.Stack {
     };
 
     createProductTopic.addSubscription(
-      new subscriptions.EmailSubscription(process.env.ADDITIONAL_EMAIL, {
+      new subscriptions.EmailSubscription('tsykalaihar23@gmail.com', {
         filterPolicy: secondFilterPolicy
       })
     );
@@ -110,7 +110,7 @@ export class ProductService extends cdk.Stack {
         timeout,
       })
 
-      if(handler) {
+      if(timeout) {
         createProductTopic.grantPublish(getRoutes);
 
         const catalogItemsQueue = new sqs.Queue(this, 'catalogQueue', {
