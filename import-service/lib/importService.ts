@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv'
 
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha'
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha'
+import { HttpLambdaAuthorizer, HttpLambdaResponseType } from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
 
 import * as cdk from 'aws-cdk-lib'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -14,6 +15,8 @@ import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
 
 dotenv.config()
 
+const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorizer`);
+
 const routes = [
   {
     id: 'ImportProductsFile',
@@ -21,6 +24,9 @@ const routes = [
     entry: 'src/lambdas/importProductsFile.ts',
     path: '/import',
     methods: 'GET',
+    authorization:  new HttpLambdaAuthorizer('basicAuthorizer', basicAuthorizerLambda, {
+        responseTypes: [HttpLambdaResponseType.IAM]
+    })
   },
   {
     id: 'GetParser',
