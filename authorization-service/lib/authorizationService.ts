@@ -2,14 +2,16 @@ import * as cdk from 'aws-cdk-lib'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 import { Construct } from 'constructs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
+import { config as dotenvConfig } from 'dotenv'
+dotenvConfig()
 
 const routes = [
   {
-    id: 'BasicAuthorization',
+    id: 'basicAuthorization',
     functionName: 'basicAuthorization',
     entry: 'src/lambdas/basicAuthorization.ts',
-    handler: "basicAuthorizationHandler",
-    userName: "IharTsykala",
+    handler: 'basicAuthorization',
+    userName: 'IharTsykala',
   },
 ]
 
@@ -25,7 +27,6 @@ export class AuthorizationService extends cdk.Stack {
     }
 
     for (const route of routes) {
-
       const { id, functionName, entry, handler, userName } = route
 
       new NodejsFunction(this, id, {

@@ -1,9 +1,8 @@
 import { Construct } from 'constructs'
-import * as dotenv from 'dotenv'
 
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha'
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha'
-import { HttpLambdaAuthorizer, HttpLambdaResponseType } from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
+import { HttpLambdaAuthorizer, HttpLambdaResponseType, } from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
 
 import * as cdk from 'aws-cdk-lib'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -13,9 +12,8 @@ import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
 
-dotenv.config()
-
-// const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorizer`);
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
 
 const routes = [
   {
@@ -37,13 +35,6 @@ const routes = [
 export class ImportService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
-
-    const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorization`);
-
-    const authorization =  new HttpLambdaAuthorizer('basicAuthorizer', basicAuthorizerLambda, {
-      responseTypes: [HttpLambdaResponseType.IAM]
-    })
-
 
     // eslint-disable-next-line prettier/prettier
     const queue = sqs.Queue.fromQueueArn(this, 'catalogItemsQueue', process.env.QUEUE_ARN!);
@@ -78,6 +69,12 @@ export class ImportService extends cdk.Stack {
         allowOrigins: ['*'],
         allowMethods: [apiGateway.CorsHttpMethod.ANY],
       }
+    })
+
+    const basicAuthorizationLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorization', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorization`);
+
+    const authorization = new HttpLambdaAuthorizer('basicAuthorization', basicAuthorizationLambda, {
+      responseTypes: [HttpLambdaResponseType.SIMPLE]
     })
 
     for (const route of routes) {

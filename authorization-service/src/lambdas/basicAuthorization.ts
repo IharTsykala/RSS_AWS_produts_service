@@ -1,5 +1,8 @@
 import { response } from '../utils/response'
 
+import { config as dotenvConfig } from 'dotenv'
+dotenvConfig()
+
 const getBody = (effect: string, methodArn: string) => {
   return {
     principalId: 'user',
@@ -16,23 +19,22 @@ const getBody = (effect: string, methodArn: string) => {
   }
 }
 
-export const handler = async (event: any): Promise<any> => {
-  console.log('basicAuthorizationHandler', JSON.stringify(event, null, 2))
-
+export const handler = async (event: any, _: any, callback: any): Promise<any> => {
   try {
     const { authorizationToken, methodArn } = event
 
     if (!authorizationToken) {
-      return response(getBody('Deny', methodArn))
+      callback('Unauthorized')
     }
 
     const encodedCredentials = authorizationToken.split(' ')[1]
 
-    const [username, password] = Buffer.from(encodedCredentials, 'base64').toString().split(':')
+    const [username, password] = Buffer.from(encodedCredentials, 'base64').toString('utf-8').split(':')
 
-    console.log(`username: ${username}, password ${password}`)
+    console.log(`username ${username}, password ${password}`)
 
-    const storedPassword = process.env[username]
+    // eslint-disable-next-line prettier/prettier
+    const storedPassword = process.env["IharTsykala"]!
     const effect = !storedPassword || storedPassword !== password ? 'Deny' : 'Allow'
 
     return response(getBody(effect, methodArn))
