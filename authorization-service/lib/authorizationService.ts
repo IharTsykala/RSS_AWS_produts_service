@@ -6,6 +6,15 @@ import { Construct } from 'constructs'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 
 const routes = [
+  {
+    id: 'BasicAuthorization',
+    functionName: 'basicAuthorization',
+    entry: 'src/lambdas/basicAuthorization.ts',
+    path: '',
+    methods: '',
+    handler: "basicAuthorizationHandler",
+    userName: "IharTsykala",
+  },
 ]
 
 export class AuthorizationService extends cdk.Stack {
@@ -29,14 +38,17 @@ export class AuthorizationService extends cdk.Stack {
 
     for (const route of routes) {
 
-      const { id, functionName, entry, path, methods } = route
+      const { id, functionName, entry, path, methods, handler, userName } = route
 
       const getRoutes = new NodejsFunction(this, id, {
         ...sharedLambdaProps,
         functionName,
         entry,
+        handler,
         environment: {
           ...sharedLambdaProps.environment,
+          // eslint-disable-next-line prettier/prettier
+          [userName]: process.env[userName]!,
         },
       })
 
