@@ -23,7 +23,7 @@ export const handler = async (event: any): Promise<any> => {
     const { authorizationToken, methodArn } = event
 
     if (!authorizationToken) {
-      return response(400, getBody('Deny', methodArn))
+      return response(getBody('Deny', methodArn))
     }
 
     const encodedCredentials = authorizationToken.split(' ')[1]
@@ -35,12 +35,10 @@ export const handler = async (event: any): Promise<any> => {
     const storedPassword = process.env[username]
     const effect = !storedPassword || storedPassword !== password ? 'Deny' : 'Allow'
 
-    return response(200, getBody(effect, methodArn))
+    return response(getBody(effect, methodArn))
   } catch (error) {
     if (error instanceof Error) {
-      return response(500, {
-        message: error.message,
-      })
+      return response(getBody('Deny', event.methodArn))
     }
   }
 }
