@@ -15,7 +15,7 @@ import * as s3notificaitions from "aws-cdk-lib/aws-s3-notifications";
 
 dotenv.config()
 
-const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorizer`);
+// const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorizer`);
 
 const routes = [
   {
@@ -24,9 +24,6 @@ const routes = [
     entry: 'src/lambdas/importProductsFile.ts',
     path: '/import',
     methods: 'GET',
-    authorization:  new HttpLambdaAuthorizer('basicAuthorizer', basicAuthorizerLambda, {
-        responseTypes: [HttpLambdaResponseType.IAM]
-    })
   },
   {
     id: 'GetParser',
@@ -40,6 +37,13 @@ const routes = [
 export class ImportService extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props)
+
+    const basicAuthorizerLambda = lambda.Function.fromFunctionArn(this, 'basicAuthorizer', `arn:aws:lambda:us-east-1:536622564201:function:basicAuthorization`);
+
+    const authorization =  new HttpLambdaAuthorizer('basicAuthorizer', basicAuthorizerLambda, {
+      responseTypes: [HttpLambdaResponseType.IAM]
+    })
+
 
     // eslint-disable-next-line prettier/prettier
     const queue = sqs.Queue.fromQueueArn(this, 'catalogItemsQueue', process.env.QUEUE_ARN!);
@@ -104,6 +108,7 @@ export class ImportService extends cdk.Stack {
         api.addRoutes({
           integration: new HttpLambdaIntegration('ImportProductsFile', getRoutes),
           path,
+          authorizer: authorization,
           // eslint-disable-next-line prettier/prettier
           methods: [apiGateway.HttpMethod[methods as keyof typeof apiGateway.HttpMethod]],
         })
