@@ -1,0 +1,45 @@
+{
+  "name": "product_service",
+  "version": "1.0.0",
+  "bin": {
+    "products-service": "bin/productService.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "cdk:deploy": "cdk deploy --profile=IharTsykala23 --require-approval never",
+    "cdk:bootstrap": "cdk bootstrap",
+    "table:products": "node fillTableProducts.ts",
+    "table:stocks": "node fillTableStocks.ts"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.115",
+    "@types/node": "^20.2.5",
+    "@types/uuid": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "aws-cdk": "^2.78.0",
+    "eslint": "^8.41.0",
+    "ts-node": "^10.9.1",
+    "typescript": "~5.0.4"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-apigatewayv2-alpha": "^2.81.0-alpha.0",
+    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.81.0-alpha.0",
+    "@aws-sdk/client-dynamodb": "^3.350.0",
+    "@aws-sdk/client-sns": "^3.359.0",
+    "@aws-sdk/lib-dynamodb": "^3.350.0",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "aws-cdk-lib": "^2.78.0",
+    "aws-lambda": "^1.0.7",
+    "constructs": "^10.0.0",
+    "dotenv": "^16.3.1",
+    "eslint": "8.22.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.1",
+    "source-map-support": "^0.5.21",
+    "uuid": "^9.0.0"
+  }
+}
