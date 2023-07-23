@@ -6,11 +6,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "cdk": "cdk",
-    "cdk:deploy": "cdk deploy --profile=IharTsykala23 --require-approval never",
-    "cdk:bootstrap": "cdk bootstrap",
-    "table:products": "node fillTableProducts.ts",
-    "table:stocks": "node fillTableStocks.ts"
+    "start": "node dist/index.js",
+    "dev": "nodemon ./src/index.ts --watch",
+    "eb:deploy": "eb deploy"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.115",
