@@ -1,3 +1,4 @@
+//@ts-nocheck
 import express from 'express'
 import axios from 'axios'
 import dotenv from 'dotenv'
@@ -11,8 +12,8 @@ const cache = new NodeCache({ stdTTL: 120 })
 
 app.use(express.json())
 
-app.get('/products', async (req, res) => {
-  const cachedProducts = cache.get('products')
+app.get('/products', async (req: any, res: any) => {
+  const cachedProducts: any = cache.get('products')
 
   if (cachedProducts) {
     console.log('Took products from cash')
@@ -20,9 +21,9 @@ app.get('/products', async (req, res) => {
   }
 
   try {
-    const recipientURL = process.env['products']
-    const response = await axios.get(`${recipientURL}/products`)
-    const products = response.data
+    const recipientURL: any = process.env['products']
+    const response: any = await axios.get(`${recipientURL}/products`)
+    const products: any = response.data
 
     cache.set('products', products, 120) // Cache for 2 minutes (120 seconds)
     console.log('Products was cashed')
@@ -37,26 +38,31 @@ app.get('/products', async (req, res) => {
   }
 })
 
-app.all('/:recipientServiceName', async (req, res) => {
+app.all('/:recipientServiceName', async (req: any, res: any) => {
   try {
-    const recipientServiceName = req.params.recipientServiceName
-    const recipientURL = process.env[recipientServiceName]
+    const recipientServiceName: any = req.params.recipientServiceName
+    const recipientURL: any = process.env[recipientServiceName]
 
     if (!recipientURL) {
       return res.status(502).json({ error: 'Cannot process request' })
     }
 
-    const method = req.method
-    const url = `${recipientURL}${req.url}`
+    const method: any = req.method
+    const url: any = `${recipientURL}${req.originalUrl}`
+    const token = req.headers.authorization
 
-    const response = await axios({
+    const response: any = await axios({
       method,
       url,
-      data: req.body,
+      ...(Object.keys(req.body || {}).length > 0 && { data: req.body }),
+      headers: {
+        authorization: token,
+        'Content-Type': 'application/json',
+      },
     })
 
     res.status(response.status).json(response.data)
-  } catch (error) {
+  } catch (error: any) {
     if (error.response) {
       res.status(error.response.status).json(error.response.data)
     } else {
